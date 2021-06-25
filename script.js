@@ -83,13 +83,24 @@ let render = () => {
                 pipes = [...pipes.slice(1), [pipes[pipes.length-1][0] + pipeGap + pipeWidth, pipeLoc() ]];
                                 //Quand un poteau sort a gauche on en regenere un autre a droite
             }
+            // if hit the pipe, end
+            if([
+                pipe[0] <= cTenth + size[0],
+                pipe[0] + pipeWidth >= cTenth, //SI l'oiseau se situe au niveau (Y) d'un poteau
+                pipe[1] > flyHeight || pipe[1] + pipeGap < flyHeight + size[1] //On verifie si il est bien entre les deux
+            ].every (elem => elem)){        //Si il est pas entre les deux poteaux alors on arrete le jeux  et on relance
+
+                gamePlaying = false;
+                setup();
+            }
         })
+        
     }
 
     
     document.getElementById('bestScore').innerHTML = `Meilleur : ${bestScore}`;
     document.getElementById('currentScore').innerHTML = `Actuel : ${currentScore}`;
-    
+
     window.requestAnimationFrame(render);       //Cette fonction va faire l'animation. 
                                                 //En gros "index ++" va ajouter des valeurs et le
                                                 //RequestAnimationFrame va recharger l'animation.
