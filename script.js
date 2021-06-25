@@ -11,12 +11,29 @@ const size = [51,36];           //Taille de l'oiseau (utilisé dans drawImage())
 const jump = -11.5;
 const cTenth = (canvas.width / 10);
 
+// pipe settings
+const pipeWidth = 78;           //largeur poteau
+const pipeGap = 270;            //ecart entre les poteaux 
+const pipeLoc = () => (Math.random() * ((canvas.height - (pipeGap + pipeWidth)) - pipeWidth)) + pipeWidth;
+                                //fonction qui va placer les poteaux au hasard et en générer.
+
+
 let index = 0,
     bestScore = 0,
     currentScore = 0,
     pipes = [],
     flight,
     flyHeight;
+
+const setup = () =>{            // Cette variable permet de remettre a 0 le jeux
+    currentScore = 0;
+    flight = jump;
+    flyHeight = (canvas.height / 2) - (size[1] / 2);
+
+    pipes = Array(3).fill().map((a, i) => [canvas.width + (i * (pipeGap + pipeWidth)), pipeLoc()]);
+                                // Pipes est composé de 2 elements. Element 1 : calcule du rapprochement des poteaux sur l'oiseau
+                                // Element 2 : calcule de la hauteur de l'element (pour pas qu'ils soient tous allignés)
+}                               
 
 let render = () => {
     index ++;
@@ -33,7 +50,8 @@ let render = () => {
         ctx.drawImage(img, 432, Math.floor((index % 9) / 3) * size[1], ...size, cTenth, flyHeight, ...size); 
                                                 //placer l'oiseau a gauche de l'ecran pour débuter le jeux
         flight += gravity;
-        flyHeight = Math.min(flyHeight + flight, canvas.height - size[1]);
+        flyHeight = Math.min(flyHeight + flight, canvas.height - size[1]); 
+                                                //l'ajouter du canvas.height ... permet en gros de bloquer l'oiseau en bas de l'écran
 
     }else{
     ctx.drawImage(img, 432, Math.floor((index % 9) / 3) * size[1], ...size, ((canvas.width / 2 ) - size[0] / 2), flyHeight,...size);                            
@@ -45,13 +63,28 @@ let render = () => {
     ctx.fillText('Cliquez pour jouer', 48, 535);
     ctx.font = "bold 30px courier";
     }
+
+    //pipe display
+    if(gamePlaying){
+        pipes.map(pipe => {
+            pipe[0] -= speed;
+
+            //top pipe
+            ctx.drawImage(img, 432, 588 - pipe[1], pipeWidth, pipe[1], pipe[0], 0, pipeWidth, pipe[1]);
+
+            //botom pipe
+            ctx.drawImage(img, 432 + pipeWidth, 108, pipeWidth, canvas.height - pipe[1] + pipeGap, pipe[0], pipe[1] + pipeGap, pipeWidth, canvas.height - pipe[1] + pipeGap );
+        })
+    }
+
     window.requestAnimationFrame(render);       //Cette fonction va faire l'animation. 
                                                 //En gros "index ++" va ajouter des valeurs et le
                                                 //RequestAnimationFrame va recharger l'animation.
 
 }
-img.onload = render;                            //Au chargement de l'image, on lance le render
 
+setup();
+img.onload = render;                            //Au chargement de l'image, on lance le render
 document.addEventListener('click', () => gamePlaying = true);
                                                 //Fonction fléché, au click, gamePlayin passe a trou donc le jeux se lance
 window.onclick = () => flight = jump;           // le jump ici va permettre de faire sauter l'oiseau. I
